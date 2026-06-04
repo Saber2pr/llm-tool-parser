@@ -1,0 +1,28 @@
+src/index.ts
+  h_eabc34dcaf7833 1
+.github/workflows/npm-publish.yml
+  h_eabc34dcaf7833 1-21
+.github/workflows/jest-test.yml
+  h_eabc34dcaf7833 1-30
+package.json
+  h_eabc34dcaf7833 1-54
+README.md
+  h_eabc34dcaf7833 1-53
+.gitignore
+  h_eabc34dcaf7833 1-7
+src/parser.test.ts
+  h_eabc34dcaf7833 1-458
+tsconfig.json
+  h_eabc34dcaf7833 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "75c82d0b8ebc5f2db6194168490e4fc8daa4b8b1",
+  "prompts": {},
+  "humans": {
+    "h_eabc34dcaf7833": {
+      "author": "muhai <muhai.li@tuya.com>"
+    }
+  }
+}
