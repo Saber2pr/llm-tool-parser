@@ -119,6 +119,14 @@ export function parseLlmToolCalls(text: string): LlmToolCallParseResult {
           return { content, toolCalls };
         }
       }
+    } else {
+      const partialToolCalls = tryExtractPartialToolCalls(
+        trimmedText.substring(toolCallsJsonIdx),
+      );
+      if (partialToolCalls.length > 0) {
+        const content = trimmedText.substring(0, toolCallsJsonIdx).trim();
+        return { content, toolCalls: partialToolCalls };
+      }
     }
   }
 
@@ -265,6 +273,16 @@ export function parseLlmToolCalls(text: string): LlmToolCallParseResult {
     }
   }
 
+  const partialToolCalls = tryExtractPartialToolCalls(trimmedText);
+  if (partialToolCalls.length > 0) {
+    return { content: "", toolCalls: partialToolCalls };
+  }
+
+  // Never surface raw tool-call JSON as user-visible content (including truncated streams).
+  if (looksLikeToolCall(text)) {
+    return { content: "", toolCalls: [] };
+  }
+
   return { content: text, toolCalls: [] };
 }
 
@@ -278,9 +296,12 @@ export function looksLikeToolCall(text: string): boolean {
   if (t.startsWith("{") || t.startsWith("[tool_calls]") || t.startsWith("[{")) return true;
   if (/^Action:\s*\w+/.test(t)) return true;
   if (t.includes('{"tool_calls"')) return true;
+  if (/"tool_calls"\s*:\s*\[/.test(t)) return true;
+  if (/"tool_name"\s*:\s*"/.test(t) && t.includes("{")) return true;
   if (t.includes('"function_call"')) return true;
   if (t.includes('"tool_use"')) return true;
   if (/\[Called tools?:/.test(t)) return true;
+  if (/```(?:json)?[\s\S]*"tool_calls"/.test(t)) return true;
   return false;
 }
 
@@ -588,6 +609,122 @@ function escapeLiteralControlCharsInJsonStrings(text: string): string {
   }
 
   return result;
+}
+
+/**
+ * Best-effort extraction from incomplete/truncated tool_calls JSON.
+ * Used when streaming ends before the model finishes the response.
+ */
+function tryExtractPartialToolCalls(text: string): LlmToolCall[] {
+  const toolCalls: LlmToolCall[] = [];
+  const arrayMarker = /"tool_calls"\s*:\s*\[/.exec(text);
+
+  if (arrayMarker) {
+    let pos = arrayMarker.index + arrayMarker[0].length;
+
+    while (pos < text.length) {
+      while (pos < text.length && /[\s,]/.test(text[pos]!)) pos++;
+      if (pos >= text.length || text[pos] === "]") break;
+      if (text[pos] !== "{") break;
+
+      const entry = tryParsePartialToolEntry(text, pos);
+      if (!entry) break;
+
+      toolCalls.push(entry);
+
+      const jsonStr = extractBalancedJson(text, pos);
+      if (jsonStr) {
+        pos += jsonStr.length;
+        continue;
+      }
+
+      break;
+    }
+  }
+
+  if (toolCalls.length > 0) {
+    return toolCalls;
+  }
+
+  const singleNameMatch = /"tool_name"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/.exec(text);
+  if (singleNameMatch) {
+    toolCalls.push({
+      id: generateId(),
+      name: singleNameMatch[1]!,
+      arguments: tryParsePartialArguments(text),
+    });
+  }
+
+  return toolCalls;
+}
+
+function tryParsePartialToolEntry(text: string, start: number): LlmToolCall | null {
+  const slice = text.substring(start);
+  const nameMatch = /^\{\s*"tool_name"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"/.exec(slice);
+  if (!nameMatch) return null;
+
+  return {
+    id: generateId(),
+    name: nameMatch[1]!,
+    arguments: tryParsePartialArguments(slice),
+  };
+}
+
+function tryParsePartialArguments(text: string): Record<string, unknown> {
+  const argsMatch = /"arguments"\s*:\s*(\{[\s\S]*)/.exec(text);
+  if (!argsMatch) return {};
+
+  const argsBody = argsMatch[1]!.trim();
+  const balanced = extractBalancedJson(argsBody, 0);
+  if (balanced) {
+    return tryParseLooseJson<Record<string, unknown>>(balanced) ?? {};
+  }
+
+  return tryRepairIncompleteJsonObject(argsBody) ?? {};
+}
+
+function tryRepairIncompleteJsonObject(text: string): Record<string, unknown> | null {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{")) return null;
+
+  const balanced = extractBalancedJson(trimmed, 0);
+  if (balanced) {
+    return tryParseLooseJson<Record<string, unknown>>(balanced);
+  }
+
+  let repaired = trimmed;
+  let inString = false;
+  let escape = false;
+  let depth = 0;
+
+  for (const ch of repaired) {
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (ch === "\\" && inString) {
+      escape = true;
+      continue;
+    }
+    if (ch === "\"") {
+      inString = !inString;
+      continue;
+    }
+    if (!inString) {
+      if (ch === "{") depth++;
+      else if (ch === "}") depth--;
+    }
+  }
+
+  if (inString) {
+    repaired += "\"";
+  }
+  while (depth > 0) {
+    repaired += "}";
+    depth--;
+  }
+
+  return tryParseLooseJson<Record<string, unknown>>(repaired);
 }
 
 function extractBalancedJson(text: string, start: number): string | null {

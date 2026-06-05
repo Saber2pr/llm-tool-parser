@@ -455,4 +455,63 @@ describe('looksLikeToolCall', () => {
   it('returns false for markdown content', () => {
     expect(looksLikeToolCall('## Heading\n\nSome content here')).toBe(false)
   })
+
+  it('detects partial truncated tool_calls JSON during streaming', () => {
+    expect(
+      looksLikeToolCall('{"tool_calls":[{"tool_name":"listFiles","arguments')
+    ).toBe(true)
+  })
+
+  it('detects tool_calls marker before opening brace', () => {
+    expect(looksLikeToolCall('"tool_calls": [{"tool_name":"glob"')).toBe(true)
+  })
+})
+
+describe('truncated / incomplete tool_calls JSON', () => {
+  it('does not leak truncated JSON as content (ai.log scenario)', () => {
+    const truncated = '{"tool_calls":[{"tool_name":"listFiles","arguments'
+    const { content, toolCalls } = parseLlmToolCalls(truncated)
+
+    expect(content).toBe('')
+    expect(toolCalls).toHaveLength(1)
+    expect(toolCalls[0]!.name).toBe('listFiles')
+    expect(toolCalls[0]!.arguments).toEqual({})
+  })
+
+  it('repairs truncated arguments object', () => {
+    const truncated =
+      '{"tool_calls":[{"tool_name":"listFiles","arguments":{"path":"/Users/xxx/xxxx/yyy"'
+    const { content, toolCalls } = parseLlmToolCalls(truncated)
+
+    expect(content).toBe('')
+    expect(toolCalls).toHaveLength(1)
+    expect(toolCalls[0]!.name).toBe('listFiles')
+    expect(toolCalls[0]!.arguments).toEqual({
+      path: '/Users/xxx/xxxx/yyy',
+    })
+  })
+
+  it('still parses complete JSON unchanged', () => {
+    const complete =
+      '{"tool_calls":[{"tool_name":"listFiles","arguments":{"path":"/Users/xxx/xxxx/yyy"}}]}'
+    const { content, toolCalls } = parseLlmToolCalls(complete)
+
+    expect(content).toBe('')
+    expect(toolCalls).toHaveLength(1)
+    expect(toolCalls[0]!.name).toBe('listFiles')
+    expect(toolCalls[0]!.arguments).toEqual({
+      path: '/Users/xxx/xxxx/yyy',
+    })
+  })
+
+  it('preserves leading text when trailing JSON is truncated', () => {
+    const text =
+      '让我看看\n{"tool_calls":[{"tool_name":"fileRead","arguments":{"filePath":"/tmp/a.ts"'
+    const { content, toolCalls } = parseLlmToolCalls(text)
+
+    expect(content).toBe('让我看看')
+    expect(toolCalls).toHaveLength(1)
+    expect(toolCalls[0]!.name).toBe('fileRead')
+    expect(toolCalls[0]!.arguments).toEqual({ filePath: '/tmp/a.ts' })
+  })
 })
