@@ -1,0 +1,46 @@
+README.md
+  s_2047e793990361::t_da4bcc2d71ab1f 17-18,20
+  h_eabc34dcaf7833 19
+.github/workflows/pages.yml
+  h_eabc34dcaf7833 1-18
+public/index.html
+  s_2047e793990361::t_ba2c7877075191 2
+  s_2047e793990361::t_d6bdbc30d3a766 256
+  s_2047e793990361::t_8559b12ecf05df 1,3-125,142-213,215-218,222-226,228-230,232-233,244-255,257-283,290-291,293-301,303-323
+  s_2047e793990361::t_33bc15cfd4a1bd 284-285,289,292
+  s_2047e793990361::t_4693982e98443a 286-288
+  s_2047e793990361::t_f85f0e92814758 234-243
+  s_2047e793990361::t_c0fd3c4f6f8ed4 227,231
+  s_2047e793990361::t_94f3e881634677 302
+  s_2047e793990361::t_b75e12a3b95df3 214
+  s_2047e793990361::t_ac77b0a85bb577 219-221
+  s_2047e793990361::t_679369747f45c1 126-141
+public/parser.bundle.js
+  s_2047e793990361::t_5bd0082ec0b681 1-536
+src/browser.ts
+  s_2047e793990361::t_082c5c136395b3 1-2
+package.json
+  s_2047e793990361::t_3574298acf532a 44
+  s_2047e793990361::t_5df89630ddcd19 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "248a604fbf6366116de28f4b1684bd522ff3a127",
+  "prompts": {},
+  "humans": {
+    "h_eabc34dcaf7833": {
+      "author": "muhai <muhai.li@tuya.com>"
+    }
+  },
+  "sessions": {
+    "s_2047e793990361": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fb16709f-0c06-423c-aa58-fcdf15996d63",
+        "model": "default"
+      },
+      "human_author": "muhai <muhai.li@tuya.com>"
+    }
+  }
+}
