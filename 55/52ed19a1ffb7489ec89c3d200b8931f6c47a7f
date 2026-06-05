@@ -1,0 +1,30 @@
+src/parser.ts
+  s_5379fc5c77f1f9::t_89f75b91466e2a 122-129
+  s_5379fc5c77f1f9::t_6d3ecdfe804d2a 614-729
+  s_5379fc5c77f1f9::t_dd5e990887a565 299-300,304
+  s_5379fc5c77f1f9::t_dd0f99fa12535a 276-285
+src/parser.test.ts
+  s_5379fc5c77f1f9::t_d44e3cacc8a77a 458-482,484-489,491-495,497-502,504-516
+  h_eabc34dcaf7833 483,490,496,503
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "5552ed19a1ffb7489ec89c3d200b8931f6c47a7f",
+  "prompts": {},
+  "humans": {
+    "h_eabc34dcaf7833": {
+      "author": "muhai <muhai.li@tuya.com>"
+    }
+  },
+  "sessions": {
+    "s_5379fc5c77f1f9": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "588fd9d5-32d0-44c6-93c2-b40a2622e470",
+        "model": "default"
+      },
+      "human_author": "muhai <muhai.li@tuya.com>"
+    }
+  }
+}
