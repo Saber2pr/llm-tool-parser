@@ -31,6 +31,8 @@
   "scripts": {
     "start": "tsc --watch",
     "build": "tsc",
+    "build:browser": "esbuild src/browser.ts --bundle --format=iife --global-name=LlmToolParser --outfile=public/parser.bundle.js --target=es2020",
+    "serve": "yarn build:browser && npx --yes serve public -p 5173",
     "prepublishOnly": "yarn build",
     "test": "vitest run src/*.test.ts",
     "lint": "prettier --write ./src",
@@ -39,6 +41,7 @@
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^25.9.1",
+    "esbuild": "^0.25.0",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "prettier": "^2.4.1",

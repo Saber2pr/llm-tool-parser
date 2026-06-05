@@ -14,6 +14,10 @@ The library converts inconsistent, streaming, or partially corrupted LLM outputs
 * Normalizes all inputs into a unified `ToolCall` schema
 * Works with both structured tool calling and prompt-based agents
 
+## Live parse
+
+**Live parse:** https://saber2pr.top/llm-tool-parser/
+
 ## Simple usage
 
 Examples below are based on `src/parser.test.ts`.
