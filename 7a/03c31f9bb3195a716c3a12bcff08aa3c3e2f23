@@ -1,0 +1,14 @@
+tsconfig.json
+  h_eabc34dcaf7833 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "7a03c31f9bb3195a716c3a12bcff08aa3c3e2f23",
+  "prompts": {},
+  "humans": {
+    "h_eabc34dcaf7833": {
+      "author": "muhai <muhai.li@tuya.com>"
+    }
+  }
+}
