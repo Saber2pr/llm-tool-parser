@@ -1,6 +1,6 @@
 {
   "name": "llm-tool-parser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Universal LLM tool call extractor that normalizes messy outputs into a unified ToolCall format.",
   "repository": {
     "type": "git",
